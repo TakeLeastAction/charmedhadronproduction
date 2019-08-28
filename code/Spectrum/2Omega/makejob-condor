@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#################################################
+## created by Haijun Yang (haijun.yang@cern.ch)
+## Shanghai Jiao Tong University
+## June 18, 2013
+#################################################
+
+# PATH & User
+path=`readlink -f .`
+user=$USER
+
+MytestCondor="Mytest-data.condor"
+MytestShell="run.sh"
+#---------------------------------------------------------------------
+# Condor script
+#---------------------------------------------------------------------
+cat >$MytestCondor <<EOF
+Executable = $MytestShell
+Universe = vanilla
+Notification = Complete
+
+### For Testing
+#+IsTestJob = True
+#Requirements = ( IS_TEST_QUEUE =?= True )
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+EOF
+
+####################################
+for dir in `ls -d col_xn-*`; do
+    
+  cat >>$MytestCondor <<EOF
+
+  Output = log/run-$dir.out
+  Error  = log/run-$dir.err
+  Log    = log/run-$dir.log
+  transfer_input_files = 
+  Arguments = $path $dir $user
+  Queue
+
+EOF
+
+  echo "INFO ==> SubFolder $dir added."    
+
+done
+####################################
+
+### submit condor jobs
+echo "INFO ==> Submitting Condor Jobs"
+mkdir log
+/usr/bin/condor_submit Mytest-data.condor
+

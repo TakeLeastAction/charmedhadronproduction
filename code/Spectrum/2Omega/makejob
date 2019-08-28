@@ -1,0 +1,21 @@
+#!/bin/bash
+
+unique_tag=`date +%s`
+
+for file in col_xn
+do
+{
+#############################################################################
+   is=0
+   while [ $is -lt 1 ]; do
+   {
+   is=`expr $is + 1`
+   folder=$file-$is-$unique_tag
+   mkdir $folder
+   cp $file $folder
+   cp run.sh $folder
+   }
+   done
+##############################################################################
+}
+done
